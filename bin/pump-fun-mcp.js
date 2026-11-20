@@ -1,11 +1,22 @@
 #!/usr/bin/env node
 // MCP server over stdio: one JSON-RPC message per line. Logs go to stderr only,
 // because stdout belongs to the protocol.
+import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { handle } from "../lib/server.js";
 
+if (process.argv.includes("--version") || process.argv.includes("-v")) {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  process.stdout.write(`${pkg.version}\n`);
+  process.exit(0);
+}
+
 if (process.argv.includes("--help")) {
   process.stderr.write(`pump-fun-mcp: Solana memecoin and pump.fun tools for AI assistants (MCP, stdio)
+
+Options:
+  --help        Show this help text
+  --version, -v Show server version
 
 Add it to your MCP client, for example Claude Code:
   claude mcp add pump-fun -- node ${new URL("./pump-fun-mcp.js", import.meta.url).pathname}

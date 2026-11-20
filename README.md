@@ -98,6 +98,10 @@ Real output from a run on 18 November 2026:
 ```text
 pump-fun-mcp: Solana memecoin and pump.fun tools for AI assistants (MCP, stdio)
 
+Options:
+  --help        Show this help text
+  --version, -v Show server version
+
 Add it to your MCP client, for example Claude Code:
   claude mcp add pump-fun -- node /home/blix/blixtrade-org/pump-fun-mcp/bin/pump-fun-mcp.js
 

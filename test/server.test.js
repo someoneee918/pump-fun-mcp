@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { handle } from "../lib/server.js";
@@ -71,4 +72,30 @@ test("null params and non-object arguments on tools/call are invalid params, not
 
   const badName = await handle({ jsonrpc: "2.0", id: 15, method: "tools/call", params: { name: 42 } });
   assert.equal(badName.error.code, -32602);
+});
+
+test("serverInfo.version equals package.json version", async () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  const r = await handle({ jsonrpc: "2.0", id: 20, method: "initialize", params: {} });
+  assert.equal(r.result.serverInfo.version, pkg.version);
+});
+
+test("bin with --version exits 0 and prints version", async () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  const child = spawn(process.execPath, [fileURLToPath(new URL("../bin/pump-fun-mcp.js", import.meta.url)), "--version"]);
+  let out = "";
+  child.stdout.on("data", (d) => (out += d));
+  const code = await new Promise((r) => child.on("close", r));
+  assert.equal(code, 0);
+  assert.equal(out.trim(), pkg.version);
+});
+
+test("bin with -v exits 0 and prints version", async () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  const child = spawn(process.execPath, [fileURLToPath(new URL("../bin/pump-fun-mcp.js", import.meta.url)), "-v"]);
+  let out = "";
+  child.stdout.on("data", (d) => (out += d));
+  const code = await new Promise((r) => child.on("close", r));
+  assert.equal(code, 0);
+  assert.equal(out.trim(), pkg.version);
 });
